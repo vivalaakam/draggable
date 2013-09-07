@@ -12,31 +12,45 @@
 
         work.find('[data-type=draggable]').each(function() {
           var $this = $(this), $header = $this.find('.panel-heading');
-          $header.mousedown(function(e) {
-            console.log(e);
-            $active = $this;
-          });
 
-          $header.mousemove(function(e) {
-            e.preventDefault();
+          $header.on('mousedown', function(e) {
+            $active = $this;
+            $active.drag = {};
+            $active.drag.offsetX = 125;
+            $active.drag.offsetY = e.offsetY !== undefined ? e.offsetY : e.pageY - $active.offset().top;
+            $active.appendTo(desktop)
+            $active.find('.panel-body').hide();
+            $active.width(250);
+            $active.css({position: 'absolute', left: e.pageX - 125, top: e.pageY - e.offsetY});
+            $active.bind('cancel', function() {
+              $active = false
+            })
+            $active.on('mouseup', function(e) {
+              $active.trigger('cancel');
+            });
+          })
+
+          $header.on('mousemove', function(e) {
             if ($active) {
-              if ($active.data('drag')) {
-                $active.css({left: e.pageX - 125, top: e.pageY});
-              } else {
-                $active.find('.panel-body').hide();
-                $active.width(250);
-                $active.css({position: 'absolute', left: e.pageX - 125, top: e.pageY});
-                $active.mouseup(function(e) {
-                  console.log('mouseup');
-                  $active = false;
-                });
-                $active.data('drag', true);
-              }
+              $active.css({
+                'left': e.pageX - $active.drag.offsetX,
+                'top': e.pageY - $active.drag.offsetY
+              });
+
+              panel.hover(function() {
+                panel.addClass('blur')
+              }, function() {
+                panel.removeClass('blur')
+              })
             }
           });
-
-          $header;
         });
+
+        $(window).on('mouseup', function(e) {
+          if ($active) {
+            $active.trigger('cancel');
+          }
+        })
       });
     </script>
     <style>
@@ -122,6 +136,10 @@
         top: 0px;
         left: 0px;
         bottom: 0px;
+      }
+
+      .blur {
+        border: 1px solid brown;
       }
     </style>
   </head>
