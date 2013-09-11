@@ -8,27 +8,46 @@
       $(document).ready(function() {
         var desktop = $('#desktop'),
                 work = desktop.find('#work'),
-                panel = desktop.find('#panel'), $active = false;
+                panel = desktop.find('#panel'), $active = false, $el = null;
 
         work.find('[data-type=draggable]').each(function() {
           var $this = $(this), $header = $this.find('.panel-heading');
 
           $header.on('mousedown', function(e) {
             $active = $this;
-            $active.drag = {};
-            $active.drag.offsetX = 125;
-            $active.drag.offsetY = e.offsetY !== undefined ? e.offsetY : e.pageY - $active.offset().top;
-            $active.appendTo(desktop)
+            $active.drag = {
+              offsetX: 125,
+              offsetY: e.offsetY !== undefined ? e.offsetY : e.pageY - $active.offset().top,
+              moved: false
+            };
+            console.log($active.get(0).parentNode)
+            $active.appendTo(desktop);
+
             $active.find('.panel-body').hide();
             $active.width(250);
             $active.css({position: 'absolute', left: e.pageX - 125, top: e.pageY - e.offsetY});
             $active.bind('cancel', function() {
-              $active = false
-            })
-            $active.on('mouseup', function(e) {
-              $active.trigger('cancel');
+              console.log($active.drag)
+              if ($active.drag.moved) {
+                $active.hide()
+                $el = $(document.elementFromPoint(e.pageX, e.pageY));
+                $active.show();
+                if ($el.get(0) == panel.get(0)) {
+                  $active.appendTo(panel)
+                  $active.css({position: 'relative', top: 0, left: 0, width: '100%'})
+                  panel.removeClass('blur');
+                } else if ($el.get(0) == work.get(0)) {
+                  $active.appendTo(work);
+                  $active.css({position: 'relative', top: 0, left: 0, width: '100%'})
+                  $active.find('.panel-body').show();
+                }
+              } else {
+
+              }
+
+              $active = false;
             });
-          })
+          });
 
           $header.on('mousemove', function(e) {
             if ($active) {
@@ -36,12 +55,16 @@
                 'left': e.pageX - $active.drag.offsetX,
                 'top': e.pageY - $active.drag.offsetY
               });
+              $active.drag.moved = true;
+              $active.hide()
+              $el = $(document.elementFromPoint(e.pageX, e.pageY));
+              $active.show();
+              if ($el.get(0) == panel.get(0)) {
+                panel.addClass('blur');
+              } else {
+                panel.removeClass('blur');
+              }
 
-              panel.hover(function() {
-                panel.addClass('blur')
-              }, function() {
-                panel.removeClass('blur')
-              })
             }
           });
         });
@@ -50,7 +73,7 @@
           if ($active) {
             $active.trigger('cancel');
           }
-        })
+        });
       });
     </script>
     <style>
@@ -90,9 +113,6 @@
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
       }
 
-      .panel-primary {
-        border-color: #428bca;
-      }
 
       .panel-heading {
         padding: 10px 15px;
@@ -101,11 +121,7 @@
         border-top-left-radius: 3px;
       }
 
-      .panel-primary > .panel-heading {
-        color: #ffffff;
-        background-color: #428bca;
-        border-color: #428bca;
-      }
+
 
       .panel-title {
         margin-top: 0;
@@ -115,6 +131,115 @@
 
       .panel-body {
         padding: 15px;
+      }
+
+
+      .panel-default {
+        border-color: #dddddd;
+      }
+
+      .panel-default > .panel-heading {
+        color: #333333;
+        background-color: #f5f5f5;
+        border-color: #dddddd;
+      }
+
+      .panel-default > .panel-heading + .panel-collapse .panel-body {
+        border-top-color: #dddddd;
+      }
+
+      .panel-default > .panel-footer + .panel-collapse .panel-body {
+        border-bottom-color: #dddddd;
+      }
+
+      .panel-primary {
+        border-color: #428bca;
+      }
+
+      .panel-primary > .panel-heading {
+        color: #ffffff;
+        background-color: #428bca;
+        border-color: #428bca;
+      }
+
+      .panel-primary > .panel-heading + .panel-collapse .panel-body {
+        border-top-color: #428bca;
+      }
+
+      .panel-primary > .panel-footer + .panel-collapse .panel-body {
+        border-bottom-color: #428bca;
+      }
+
+      .panel-success {
+        border-color: #d6e9c6;
+      }
+
+      .panel-success > .panel-heading {
+        color: #468847;
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+      }
+
+      .panel-success > .panel-heading + .panel-collapse .panel-body {
+        border-top-color: #d6e9c6;
+      }
+
+      .panel-success > .panel-footer + .panel-collapse .panel-body {
+        border-bottom-color: #d6e9c6;
+      }
+
+      .panel-warning {
+        border-color: #fbeed5;
+      }
+
+      .panel-warning > .panel-heading {
+        color: #c09853;
+        background-color: #fcf8e3;
+        border-color: #fbeed5;
+      }
+
+      .panel-warning > .panel-heading + .panel-collapse .panel-body {
+        border-top-color: #fbeed5;
+      }
+
+      .panel-warning > .panel-footer + .panel-collapse .panel-body {
+        border-bottom-color: #fbeed5;
+      }
+
+      .panel-danger {
+        border-color: #eed3d7;
+      }
+
+      .panel-danger > .panel-heading {
+        color: #b94a48;
+        background-color: #f2dede;
+        border-color: #eed3d7;
+      }
+
+      .panel-danger > .panel-heading + .panel-collapse .panel-body {
+        border-top-color: #eed3d7;
+      }
+
+      .panel-danger > .panel-footer + .panel-collapse .panel-body {
+        border-bottom-color: #eed3d7;
+      }
+
+      .panel-info {
+        border-color: #bce8f1;
+      }
+
+      .panel-info > .panel-heading {
+        color: #3a87ad;
+        background-color: #d9edf7;
+        border-color: #bce8f1;
+      }
+
+      .panel-info > .panel-heading + .panel-collapse .panel-body {
+        border-top-color: #bce8f1;
+      }
+
+      .panel-info > .panel-footer + .panel-collapse .panel-body {
+        border-bottom-color: #bce8f1;
       }
 
       #desktop {
@@ -139,7 +264,7 @@
       }
 
       .blur {
-        border: 1px solid brown;
+        border: 1px solid brown !important;
       }
     </style>
   </head>
@@ -147,6 +272,46 @@
     <div id="desktop">
       <div class="col-md-9" id="work">
         <div class="panel panel-primary" data-type="draggable">
+          <div class="panel-heading">
+            <h3 class="panel-title">Panel title</h3>
+          </div>
+          <div class="panel-body">
+            Panel content
+          </div>
+        </div>
+        <div class="panel panel-success" data-type="draggable">
+          <div class="panel-heading">
+            <h3 class="panel-title">Panel title</h3>
+          </div>
+          <div class="panel-body">
+            Panel content
+          </div>
+        </div>
+        <div class="panel panel-info" data-type="draggable">
+          <div class="panel-heading">
+            <h3 class="panel-title">Panel title</h3>
+          </div>
+          <div class="panel-body">
+            Panel content
+          </div>
+        </div>
+        <div class="panel panel-warning" data-type="draggable">
+          <div class="panel-heading">
+            <h3 class="panel-title">Panel title</h3>
+          </div>
+          <div class="panel-body">
+            Panel content
+          </div>
+        </div>
+        <div class="panel panel-danger" data-type="draggable">
+          <div class="panel-heading">
+            <h3 class="panel-title">Panel title</h3>
+          </div>
+          <div class="panel-body">
+            Panel content
+          </div>
+        </div>
+        <div class="panel panel-default" data-type="draggable">
           <div class="panel-heading">
             <h3 class="panel-title">Panel title</h3>
           </div>
