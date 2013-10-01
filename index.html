@@ -8,29 +8,28 @@
       $(document).ready(function() {
         var desktop = $('#desktop'),
                 work = desktop.find('#work'),
-                panel = desktop.find('#panel'), $active = false, $el = null;
+                panel = desktop.find('#panel'), $active = false, $el = null, $this;
 
         work.find('[data-type=draggable]').each(function() {
-          var $this = $(this), $header = $this.find('.panel-heading');
-
+          var $this = $(this),
+                  $header = $this.find('.panel-heading');
           $header.on('mousedown', function(e) {
+            e.preventDefault();
             $active = $this;
             $active.drag = {
               offsetX: 125,
               offsetY: e.offsetY !== undefined ? e.offsetY : e.pageY - $active.offset().top,
               moved: false
             };
-            console.log($active.get(0).parentNode)
             $active.appendTo(desktop);
 
             $active.find('.panel-body').hide();
             $active.width(250);
             $active.css({position: 'absolute', left: e.pageX - 125, top: e.pageY - e.offsetY});
-            $active.bind('cancel', function() {
-              console.log($active.drag)
+            $active.bind('cancel', function(e, a) {
               if ($active.drag.moved) {
                 $active.hide()
-                $el = $(document.elementFromPoint(e.pageX, e.pageY));
+                $el = $(document.elementFromPoint(a.pageX, a.pageY));
                 $active.show();
                 if ($el.get(0) == panel.get(0)) {
                   $active.appendTo(panel)
@@ -50,6 +49,7 @@
           });
 
           $header.on('mousemove', function(e) {
+            e.preventDefault();
             if ($active) {
               $active.css({
                 'left': e.pageX - $active.drag.offsetX,
@@ -71,7 +71,7 @@
 
         $(window).on('mouseup', function(e) {
           if ($active) {
-            $active.trigger('cancel');
+            $active.trigger('cancel', e);
           }
         });
       });
